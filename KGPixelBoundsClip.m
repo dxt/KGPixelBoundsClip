@@ -15,7 +15,7 @@
 @property (strong, nonatomic) NSData *data;
 @property (nonatomic) NSUInteger topLeftX, topLeftY, bottomRightX, bottomRightY;
 @property (nonatomic) BOOL foundTopX, foundTopY, foundBottomRightX, foundBottomRightY;
-@property (nonatomic) NSUInteger bitsOffset, bitsMultiplier;
+@property (nonatomic) NSUInteger bitsOffset, bitsMultiplier, bytesPerRow;
 @end
 
 @implementation KGPixelBoundsClip
@@ -37,6 +37,7 @@
     self.bottomRightY = CGImageGetHeight(imageRef);
 
     self.bitsMultiplier = CGImageGetBitsPerPixel(imageRef)/8;
+    self.bytesPerRow = CGImageGetBytesPerRow(imageRef);
 
     // Alpha seems to always be in the last byte...
     self.bitsOffset = 3;
@@ -72,7 +73,7 @@
 - (BOOL)pixelIsOpaqueAtX:(NSUInteger)x andY:(NSUInteger)y{
 //    NSLog(@"%lu, %lu", (unsigned long)x, (unsigned long)y);
     const uint8_t *bytes = [self.data bytes];
-    NSUInteger pixelIndex = (y*self.width+x)*self.bitsMultiplier;
+    NSUInteger pixelIndex = (y*self.bytesPerRow)+(x*self.bitsMultiplier);
     NSUInteger alpha = bytes[pixelIndex+self.bitsOffset];
 //    NSLog(@"%lu, %lu, %lu, %lu", (unsigned long)bytes[pixelIndex], (unsigned long)bytes[pixelIndex+self.bitsOffset+1], (unsigned long)bytes[pixelIndex+self.bitsOffset+2], (unsigned long)bytes[pixelIndex+self.bitsOffset+3]);
     if(alpha > 0){
